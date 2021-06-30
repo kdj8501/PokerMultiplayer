@@ -583,6 +583,11 @@ public class Contested implements Comparable<Contested>{
 			rank = Contested.HIGH_CARD;
 		}
 		
+		text = text.replace("11", "J");
+		text = text.replace("12", "Q");
+		text = text.replace("13", "K");
+		text = text.replace("14", "A");
+		
 		return new Contested(rank, p1High, p2High, valid, text);
 	}
 }

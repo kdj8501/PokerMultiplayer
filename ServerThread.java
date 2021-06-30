@@ -144,8 +144,10 @@ public class ServerThread extends Thread{
 	    				broadcast("server:" + userList.get(game.getWinnerIndex()) + "´ÔÀÌ ½Â¸®ÇÏ¿´½À´Ï´Ù.");
 	    				broadcast("server:" + game.getWinnerContested().getText());
 	    				ArrayList<Card> tmp = game.getWinnerValid();
+	    				String str = "";
 	    				for (Card x : tmp)
-	    					broadcast("server:" + x.toString());
+	    					str = str + x.toString();
+	    				broadcast(str);
 	    			}
     			}
     		}
