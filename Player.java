@@ -3,6 +3,11 @@ public class Player {
 	private Card hand1;
 	private Card hand2;
 	
+	public Player()
+	{
+		
+	}
+	
 	public Player(Card one, Card two)
 	{
 		hand1 = one;

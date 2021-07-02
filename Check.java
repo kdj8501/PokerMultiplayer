@@ -53,7 +53,7 @@ public class Check extends JFrame{
 	            	String msg = br.readLine();
 	            	if (msg.equals("true"))
 	            	{
-	            		new Room(newSocket);
+	            		new Room(newSocket, name);
 	            		PrintWriter pw = new PrintWriter(new OutputStreamWriter(newSocket.getOutputStream(), StandardCharsets.UTF_8), true);
 	    	            String request = "join:" + name + "\r\n";
 	    	            pw.println(request);

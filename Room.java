@@ -1,5 +1,3 @@
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
@@ -18,14 +16,18 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JScrollPane;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import java.awt.Image;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 
 public class Room extends JFrame implements ActionListener{
 	
 	private static final int WIDTH = 535;
-	private static final int HEIGHT = 420;
+	private static final int HEIGHT = 440;
 	private Socket socket;
 	private JTextArea userList;
 	private JTextArea textArea;
@@ -33,9 +35,10 @@ public class Room extends JFrame implements ActionListener{
 	private JLabel[] cards;
 	private JLabel myHand;
 	private JLabel comHand;
+	private JLabel pot;
 	private ImageIcon[] icons;
 	private JLabel[] cardText;
-	public Room(Socket socket)
+	public Room(Socket socket, String nickname)
 	{
 		this.socket = socket;
 		icons = new ImageIcon[53];
@@ -43,7 +46,7 @@ public class Room extends JFrame implements ActionListener{
 			icons[i] = new ImageIcon(new ImageIcon(this.getClass().getResource("/image/" + i + ".png")).getImage().getScaledInstance(55, 75, Image.SCALE_DEFAULT));
 		
 		new ChatClientReceiveThread(socket).start();
-		setTitle("Poker");
+		setTitle("Poker (" + nickname + ")");
 		setSize(WIDTH, HEIGHT);
 		setLocationRelativeTo(null);
 		setResizable(false);
@@ -53,16 +56,19 @@ public class Room extends JFrame implements ActionListener{
 		userList = new JTextArea();
 		userList.setEditable(false);
 		JScrollPane scrollPane1 = new JScrollPane(userList);
-		userList.append("-------UserList-------\n");
-		scrollPane1.setBounds(400, 10, 110, 190);
+		scrollPane1.setBounds(315, 10, 195, 210);
+		
+		JLabel cmdHelp = new JLabel("베팅은 채팅창에 /bet [금액]");
+		cmdHelp.setBounds(10, 240, 250, 20);
+		cmdHelp.setForeground(Color.blue);
 		
 		textArea = new JTextArea();
 		textArea.setEditable(false);
 		JScrollPane scrollPane2 = new JScrollPane(textArea);
-		scrollPane2.setBounds(10, 240, 500, 110);
+		scrollPane2.setBounds(10, 260, 500, 110);
 		
 		textField = new JTextField("",30);
-		textField.setBounds(10, 350, 500, 20);
+		textField.setBounds(10, 370, 500, 20);
 		textField.addKeyListener(new KeyAdapter()
 		{
             public void keyReleased(KeyEvent e)
@@ -73,11 +79,14 @@ public class Room extends JFrame implements ActionListener{
             }
         });
 		
-		myHand = new JLabel("My Hands");
+		myHand = new JLabel("My Hand");
 		myHand.setBounds(10, 5, 80, 20);
 		
 		comHand = new JLabel("Community Cards");
 		comHand.setBounds(10, 120, 120, 20);
+		
+		pot = new JLabel("");
+		pot.setBounds(200, 110, 80, 20);
 		
 		cardText = new JLabel[7];
 		cards = new JLabel[7];
@@ -100,11 +109,32 @@ public class Room extends JFrame implements ActionListener{
 			add(cardText[i]);
 		}
 		
+		JButton checkBtn = new JButton("체크");
+		checkBtn.setBounds(130, 25, 55, 75);
+		checkBtn.setActionCommand("Check");
+		checkBtn.addActionListener(this);
+		checkBtn.setFont(new Font("돋움", Font.PLAIN, 10));
+		JButton callBtn = new JButton("콜");
+		callBtn.setBounds(190, 25, 55, 75);
+		callBtn.setActionCommand("Call");
+		callBtn.addActionListener(this);
+		callBtn.setFont(new Font("돋움", Font.PLAIN, 11));
+		JButton foldBtn = new JButton("폴드");
+		foldBtn.setBounds(250, 25, 55, 75);
+		foldBtn.setActionCommand("Fold");
+		foldBtn.addActionListener(this);
+		foldBtn.setFont(new Font("돋움", Font.PLAIN, 10));
+		
 		add(myHand);
 		add(comHand);
+		add(pot);
+		add(cmdHelp);
 		add(scrollPane1);
 		add(scrollPane2);
 		add(textField);
+		add(checkBtn);
+		add(callBtn);
+		add(foldBtn);
 		setVisible(true);
 		addWindowListener(new WindowAdapter()
 		{
@@ -124,15 +154,55 @@ public class Room extends JFrame implements ActionListener{
             }
         });
 	}
-
+	
 	public void actionPerformed(ActionEvent e)
 	{
 		String actionCmd = e.getActionCommand();
-		if (actionCmd.equals(""))
+		if (actionCmd.equals("Call"))
 		{
-
+			PrintWriter pw;
+	        try
+	        {
+	            pw = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8), true);
+	            String request;
+	            request = "command:call";
+	            pw.println(request);
+	        }
+	        catch (IOException g)
+	        {
+	            g.printStackTrace();
+	        }
 		}
-		
+		else if (actionCmd.equals("Check"))
+		{
+			PrintWriter pw;
+	        try
+	        {
+	            pw = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8), true);
+	            String request;
+	            request = "command:check";
+	            pw.println(request);
+	        }
+	        catch (IOException g)
+	        {
+	            g.printStackTrace();
+	        }
+		}
+		else if (actionCmd.equals("Fold"))
+		{
+			PrintWriter pw;
+	        try
+	        {
+	            pw = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8), true);
+	            String request;
+	            request = "command:fold";
+	            pw.println(request);
+	        }
+	        catch (IOException g)
+	        {
+	            g.printStackTrace();
+	        }
+		}
 	}
 	
 	private void sendMessage()
@@ -145,7 +215,7 @@ public class Room extends JFrame implements ActionListener{
             String request;
             if (message.equals("/"))
             {
-            	textArea.append("error:올바르지 않은 명령어 입니다.");
+            	textArea.append("server:올바르지 않은 명령어 입니다.");
                 textArea.append("\n");
                 textArea.setCaretPosition(textArea.getDocument().getLength());
             }
@@ -232,11 +302,18 @@ public class Room extends JFrame implements ActionListener{
 	            				cardText[i].setText("");
 	            		}
 	            	}
+	            	else if (msg.split(":")[0].equals("pot"))
+	            	{
+	            		if (msg.split(":")[1].equals("-1"))
+	            			pot.setText("");
+	            		else
+	            			pot.setText("pot: " + msg.split(":")[1]);
+	            	}
 	            	else
 	            	{
 		                textArea.append(msg);
 		                textArea.append("\n");
-		                textArea.setCaretPosition(textArea.getDocument().getLength());  // 맨아래로 스크롤한다.
+		                textArea.setCaretPosition(textArea.getDocument().getLength());
 	            	}
 	            }
 	        }

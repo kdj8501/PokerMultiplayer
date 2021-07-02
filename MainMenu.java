@@ -30,7 +30,7 @@ public class MainMenu extends JFrame implements ActionListener{
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLayout(null);
 		
-		JLabel title = new JLabel("Poker V.1.0");
+		JLabel title = new JLabel("Poker V.1.5");
 		title.setBounds(40, 20, 100, 20);
 		
 		JLabel nickLabel = new JLabel("Nickname:");
@@ -76,8 +76,6 @@ public class MainMenu extends JFrame implements ActionListener{
 		{
 			if (nickText.getText().isEmpty() || nickText.getText().isBlank())
 				JOptionPane.showMessageDialog(null, "닉네임을 입력해 주세요.", "Error", JOptionPane.INFORMATION_MESSAGE);
-			else if (ipText.getText().isEmpty() || ipText.getText().isBlank())
-				JOptionPane.showMessageDialog(null, "아이피를 입력해 주세요.", "Error", JOptionPane.INFORMATION_MESSAGE);
 			else if (portText.getText().isEmpty() || portText.getText().isBlank())
 				JOptionPane.showMessageDialog(null, "포트를 입력해 주세요.", "Error", JOptionPane.INFORMATION_MESSAGE);
 			else
@@ -85,6 +83,8 @@ public class MainMenu extends JFrame implements ActionListener{
 		        Socket socket = new Socket();
 		        try
 		        {
+					if (ipText.getText().isEmpty() || ipText.getText().isBlank())
+						ipText.setText("127.0.0.1");
 		            socket.connect(new InetSocketAddress(ipText.getText(), Integer.parseInt(portText.getText())));
 		            new Check(socket, nickText.getText(), ipText.getText(), Integer.parseInt(portText.getText()));
 		            PrintWriter pw = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8), true);
@@ -116,7 +116,7 @@ public class MainMenu extends JFrame implements ActionListener{
 		        		try
 		    		    {
 				        	socket.connect(new InetSocketAddress("127.0.0.1", Integer.parseInt(portText.getText())));
-					        new Room(socket);
+					        new Room(socket, nickText.getText());
 					        PrintWriter pw = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8), true);
 			    	        String request = "join:" + nickText.getText() + "\r\n";
 			    	        pw.println(request);
