@@ -141,13 +141,15 @@ public class ServerThread extends Thread{
     	}
     	else if (data.split(" ")[0].equals("bet"))
     	{
+    		int bet = Integer.parseInt(data.split("bet")[1].trim());
     		if (playerid != game.getTurn())
     			message(printWriter, "server:당신의 턴이 아닙니다.");
     		else if (data.trim().equals("bet"))
     			message(printWriter, "server:올바른 베팅 금액을 입력해주세요.");
+    		else if (bet < game.getMaxBet() || game.getInfo(playerid).getMoney() < bet)
+    			message(printWriter, "server:해당 금액을 베팅할 수 없습니다.");
     		else
     		{
-    			int bet = Integer.parseInt(data.split("bet")[1].trim());
     			broadcast("server:" + userList.get(playerid) + "님이 " + bet + "칩을 베팅합니다.");
     			game.getInfo(playerid).doBet(bet);
     			game.addPot(bet);
